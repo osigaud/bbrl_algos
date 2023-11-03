@@ -1,4 +1,5 @@
 import hydra
+import torch
 from omegaconf import DictConfig
 
 from bbrl.workspace import Workspace
@@ -22,9 +23,8 @@ def main(cfg: DictConfig):
     # make_stkenv = make_env("supertuxkart-flattened-continuous-actions-v0",
     #                      render_mode="human", num_kart=5, use_ai=False, autoreset=False, track="sandtrack")
     env_agent = ParallelGymAgent(make_stkenv, 1)
-    agent = ContinuousActor(env_agent)
     filename = "supertuxkart-flattened-continuous-actions-v0cem2396.781005859375.agt"
-    pilot = agent.load_model(filename)
+    pilot = torch.load(filename)
     visu_agent = TemporalAgent(Agents(env_agent, pilot))
     workspace = Workspace()
     for epoch in range(10_000):
