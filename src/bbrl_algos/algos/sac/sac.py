@@ -160,7 +160,7 @@ def compute_critic_loss(
     # [[student]] Compute temporal difference
 
     q_next = torch.min(post_q_values_1[1], post_q_values_2[1]).squeeze(-1)
-    v_phi = q_next - ent_coef * action_logprobs_next
+    v_phi = q_next - ent_coef * action_logprobs_next[1]
 
     target = reward[-1] + cfg.algorithm.discount_factor * v_phi * must_bootstrap.int()
     td_1 = target - q_values_rb_1[0].squeeze(-1)
@@ -365,7 +365,7 @@ def load_best(best_filename):
 # %%
 @hydra.main(
     config_path="./configs/",
-    # config_name="sac_cartpole.yaml",
+    # config_name="sac_lunar_lander_continuous.yaml",
     config_name="sac_cartpolecontinuous.yaml",
     # config_name="sac_pendulum.yaml",
     # config_name="sac_swimmer_optuna.yaml",

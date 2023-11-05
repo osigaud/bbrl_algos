@@ -10,15 +10,15 @@
       algorithm:
 
             seed:
-                  train: 335
-                  eval: 983
+                  train: 1
+                  eval: 99
                   q: 123
                   explorer: 456
                   torch: 789
 
             nb_seeds: 1
             n_envs: 8
-            n_steps_train: 32
+            n_steps_train: 50
             n_steps: 300_000
             max_grad_norm: 0.5
             buffer_size: 1e6
@@ -32,7 +32,7 @@
             init_entropy_coef: 2e-7
             actor_type: SquashedGaussianActor
             architecture:
-                  actor_hidden_size: [32, 32]
+                  actor_hidden_size: [128, 128]
                   critic_hidden_size: [256, 256]
 
       gym_env:
