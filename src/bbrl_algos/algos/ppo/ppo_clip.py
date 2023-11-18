@@ -310,7 +310,7 @@ def run_ppo_clip(cfg, logger, trial=None):
                 eval_workspace,
                 t=0,
                 stop_variable="env/done",
-                stochastic=True,
+                stochastic=False,
                 predict_proba=False,
             )
             rewards = eval_workspace["env/cumulated_reward"][-1]

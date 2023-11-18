@@ -123,16 +123,16 @@ class TabularQAgent(NamedCritic):
         **kwargs,
     ):
         super().__init__(name, *args, **kwargs)
-        self.q_table = np.zeros((nb_states, nb_actions))
+        self.q_table = torch.zeros((nb_states, nb_actions))
         self.is_q_function = True
 
     def forward(self, t, choose_action=False, **kwargs):
         obs = self.get(("env/env_obs", t))
-        q_values = torch.Tensor(np.array([self.q_table[obs, :]], dtype=np.float32))
+        q_values = self.q_table[obs, :]
         self.set((f"{self.name}/q_values", t), q_values)
         # Sets the action
         if choose_action:
-            action = torch.Tensor(np.array([q_values.argmax()], dtype=np.int))
+            action = q_values.argmax()
             self.set(("action", t), action)
 
 

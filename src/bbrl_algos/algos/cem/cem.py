@@ -85,13 +85,13 @@ def run_cem(cfg, logger, trial=None):
         cfg.algorithm.noise_multiplier,
     )
 
-    best_score = -np.inf
+    best_reward = -np.inf
     nb_steps = 0
 
     # 7) Training loop
     while nb_steps < cfg.algorithm.n_steps:
         matrix.update_noise()
-        scores = []
+        list_rewards = []
         weights = matrix.generate_weights(centroid, pop_size)
 
         for i in range(pop_size):
@@ -107,15 +107,15 @@ def run_cem(cfg, logger, trial=None):
             logger.add_log("reward", mean_reward, nb_steps)
 
             # ---------------------------------------------------
-            scores.append(mean_reward)
+            list_rewards.append(mean_reward)
 
             if cfg.verbose:
                 print(
-                    f"Indiv: {i + 1}, nb_steps: {nb_steps}, reward: {mean_reward:.2f}"
+                    f"Indiv: {i + 1}, nb_steps: {nb_steps}, reward: {mean_reward:.2f}, best reward {best_reward:.2f}"
                 )
-            if cfg.save_best and mean_reward > best_score:
-                best_score = mean_reward
-                print(f"nb_steps: {nb_steps}, best score: {best_score:.2f}")
+            if cfg.save_best and mean_reward > best_reward:
+                best_reward = mean_reward
+                print(f"nb_steps: {nb_steps}, best reward: {best_reward:.2f}")
                 save_best(
                     eval_agent,
                     cfg.gym_env.env_name,
@@ -128,13 +128,13 @@ def run_cem(cfg, logger, trial=None):
                     plot_policy(
                         eval_agent.agent.agents[1],
                         eval_env_agent,
-                        best_score,
+                        best_reward,
                         "./cem_plots/",
                         cfg.gym_env.env_name,
                         stochastic=False,
                     )
         # Keep only best individuals to compute the new centroid
-        elites_idxs = np.argsort(scores)[-cfg.algorithm.elites_nb :]
+        elites_idxs = np.argsort(list_rewards)[-cfg.algorithm.elites_nb :]
         elites_weights = [weights[k] for k in elites_idxs]
         elites_weights = torch.cat(
             [w.clone().detach().unsqueeze(0) for w in elites_weights], dim=0
@@ -146,7 +146,7 @@ def run_cem(cfg, logger, trial=None):
         matrix.update_covariance(elites_weights)
         if cfg.verbose:
             print("---------------------")
-    return best_score
+    return best_reward
 
 
 # %%

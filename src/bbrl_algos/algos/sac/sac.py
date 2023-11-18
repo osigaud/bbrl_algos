@@ -18,7 +18,7 @@ from bbrl_algos.models.loggers import Logger
 from bbrl.utils.replay_buffer import ReplayBuffer
 
 from bbrl_algos.models.stochastic_actors import (
-    SquashedGaussianActor,
+    SquashedGaussianActorNew,
     TunableVarianceContinuousActor,
     DiscreteActor,
 )
@@ -45,7 +45,7 @@ def create_sac_agent(cfg, train_env_agent, eval_env_agent):
     assert (
         train_env_agent.is_continuous_action()
     ), "SAC code dedicated to continuous actions"
-    actor = SquashedGaussianActor(
+    actor = SquashedGaussianActorNew(
         obs_size, cfg.algorithm.architecture.actor_hidden_size, act_size, name="policy"
     )
     tr_agent = Agents(train_env_agent, actor)
@@ -365,8 +365,8 @@ def load_best(best_filename):
 # %%
 @hydra.main(
     config_path="./configs/",
-    # config_name="sac_lunar_lander_continuous.yaml",
-    config_name="sac_cartpolecontinuous.yaml",
+    config_name="sac_lunar_lander_continuous.yaml",
+    # config_name="sac_cartpolecontinuous.yaml",
     # config_name="sac_pendulum.yaml",
     # config_name="sac_swimmer_optuna.yaml",
     # config_name="sac_swimmer.yaml",
