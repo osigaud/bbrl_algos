@@ -347,6 +347,11 @@ class ConstantVarianceContinuousActor(StochasticActor):
         return Normal(mean, self.std_param), mean
 
 
+# CAP the standard deviation of the actor
+LOG_STD_MAX = 2
+LOG_STD_MIN = -20
+
+
 # old version relying on the SB3 version
 class SquashedGaussianActor(StochasticActor):
     def __init__(
@@ -365,7 +370,7 @@ class SquashedGaussianActor(StochasticActor):
         mean = self.last_mean_layer(backbone_output)
         std_out = self.last_std_layer(backbone_output)
 
-        std_out = std_out.clamp(-20, 2)  # as in the official code
+        std_out = std_out.clamp(LOG_STD_MIN, LOG_STD_MAX)  # as in the official code
         std = torch.exp(std_out)
         return self.action_dist.make_distribution(mean, std), mean
 
@@ -410,11 +415,12 @@ class SquashedGaussianActorNew(StochasticActor):
         backbone_output = self.backbone(obs)
         mean = self.last_mean_layer(backbone_output)
         std_out = self.last_std_layer(backbone_output)
-        std = self.softplus(std_out) + self.min_std
+        std_out = self.softplus(std_out) + self.min_std
+        std_out = std_out.clamp(LOG_STD_MIN, LOG_STD_MAX)  # as in the official code
         # Independent ensures that we have a multivariate
         # Gaussian with a diagonal covariance matrix (given as
         # a vector `std`)
-        return Independent(Normal(mean, std), 1)
+        return Independent(Normal(mean, std_out), 1)
 
     def forward(self, t, stochastic=True):
         normal_dist = self.normal_dist(self.get(("env/env_obs", t)))

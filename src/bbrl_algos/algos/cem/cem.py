@@ -142,7 +142,6 @@ def run_cem(cfg, logger, trial=None):
         centroid = elites_weights.mean(0)
 
         # Update covariance
-        matrix.update_noise()
         matrix.update_covariance(elites_weights)
         if cfg.verbose:
             print("---------------------")
