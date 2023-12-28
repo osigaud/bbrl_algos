@@ -1,0 +1,40 @@
+log_dir: ./tmp
+video_dir: ${log_dir}/videos
+
+logger:
+  classname: bbrl.utils.logger.TFLogger
+  log_dir: ${log_dir}
+  cache_size: 10000
+  every_n_seconds: 10
+  verbose: False
+
+optuna:
+      study:
+        _target_: optuna.create_study
+        study_name: ac_maze
+        direction: maximize
+        # for a list of optuna pruners, this is here: https://optuna.readthedocs.io/en/stable/reference/pruners.html
+        pruner:
+          _target_: optuna.pruners.MedianPruner
+          n_startup_trials: 5
+          n_warmup_steps: 5
+          interval_steps: 1
+      optimize:
+        n_trials: 400
+        timeout: 3600
+        n_jobs: 1
+
+nb_episodes: 100
+timeout: 200
+render: False
+nb_repeats: 5
+
+alpha_actor:
+  suggest_type: float
+  low: 0.1
+  high: 1.0
+
+alpha_critic:
+  suggest_type: float
+  low: 0.1
+  high: 1.0
