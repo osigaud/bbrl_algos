@@ -1,12 +1,7 @@
+use_optuna: False
+
 log_dir: ./tmp
 video_dir: ${log_dir}/videos
-
-logger:
-  classname: bbrl.utils.logger.TFLogger
-  log_dir: ${log_dir}
-  cache_size: 10000
-  every_n_seconds: 10
-  verbose: False
 
 optuna:
       study:
@@ -20,14 +15,19 @@ optuna:
           n_warmup_steps: 5
           interval_steps: 1
       optimize:
-        n_trials: 400
+        n_trials: 50 # this value will be overwritten
         timeout: 3600
         n_jobs: 1
 
+sample_size: 5 # number of values to try for alpha actor and alpha critic
 nb_episodes: 100
 timeout: 200
 render: False
-nb_repeats: 5
+nb_repeats: 10
+filename: ./perf.data
+init_filename: ./perf
+save_perf: True
+save_learning_curve: False
 
 alpha_actor:
   suggest_type: float
