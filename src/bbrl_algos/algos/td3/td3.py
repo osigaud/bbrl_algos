@@ -170,18 +170,18 @@ def run_td3(cfg, logger, trial=None):
                 # Critic update
                 # compute q_values: at t, we have Q(s,a) from the (s,a) in the RB
                 q_agent_1(rb_workspace, t=0, n_steps=1)
-                q_values_rb_1 = rb_workspace["critic/q_value"]
+                q_values_rb_1 = rb_workspace["critic/q_values"]
                 q_agent_2(rb_workspace, t=0, n_steps=1)
-                q_values_rb_2 = rb_workspace["critic/q_value"]
+                q_values_rb_2 = rb_workspace["critic/q_values"]
 
                 with torch.no_grad():
                     # replace the action at t+1 in the RB with \pi(s_{t+1}), to compute Q(s_{t+1}, \pi(s_{t+1}) below
                     ag_actor(rb_workspace, t=1, n_steps=1)
                     # compute q_values: at t+1 we have Q(s_{t+1}, \pi(s_{t+1})
                     target_q_agent_1(rb_workspace, t=1, n_steps=1)
-                    post_q_values_1 = rb_workspace["target-critic1/q_value"]
+                    post_q_values_1 = rb_workspace["target-critic1/q_values"]
                     target_q_agent_2(rb_workspace, t=1, n_steps=1)
-                    post_q_values_2 = rb_workspace["target-critic2/q_value"]
+                    post_q_values_2 = rb_workspace["target-critic2/q_values"]
 
                 post_q_values = torch.min(post_q_values_1, post_q_values_2).squeeze(-1)
                 # Compute critic loss
@@ -215,7 +215,7 @@ def run_td3(cfg, logger, trial=None):
                 # We arbitrarily chose to update the actor with respect to critic_1
                 # and we back-propagate the corresponding loss to maximize the Q values
                 q_agent_1(rb_workspace, t=0, n_steps=1)
-                q_values_1 = rb_workspace["critic/q_value"]
+                q_values_1 = rb_workspace["critic/q_values"]
                 current_q_values = q_values_1.squeeze(-1)
                 actor_loss = compute_actor_loss(current_q_values)
                 logger.add_log("actor_loss", actor_loss, nb_steps)
@@ -241,7 +241,7 @@ def run_td3(cfg, logger, trial=None):
 
             rewards = eval_workspace["env/cumulated_reward"][-1]
             q_agent_1(eval_workspace, t=0, stop_variable="env/done")
-            q_values = eval_workspace["critic/q_value"].squeeze()
+            q_values = eval_workspace["critic/q_values"].squeeze()
             delta = q_values - rewards
             maxi_delta = delta.max(axis=0)[0].detach().numpy()
             delta_list.append(maxi_delta)
@@ -252,7 +252,7 @@ def run_td3(cfg, logger, trial=None):
             if mean > best_reward:
                 best_reward = mean
 
-            print(f"nb_steps: {nb_steps}, reward: {mean:.0f}, best: {best_reward:.0f}")
+            print(f"nb_steps: {nb_steps}, reward: {mean:.2f}, best: {best_reward:.2f}")
 
             if trial is not None:
                 trial.report(mean, nb_steps)
@@ -287,7 +287,8 @@ def run_td3(cfg, logger, trial=None):
 @hydra.main(
     config_path="configs/",
     # config_name="td3_cartpolecontinuous.yaml"
-    config_name="td3_pendulum_optuna.yaml",
+    # config_name="td3_pendulum_optuna.yaml",
+    config_name="td3_walker_test.yaml",
 )  # , version_base="1.3")
 def main(cfg_raw: DictConfig):
     torch.random.manual_seed(seed=cfg_raw.algorithm.seed.torch)

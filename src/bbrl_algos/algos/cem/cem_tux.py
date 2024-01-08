@@ -38,7 +38,13 @@ matplotlib.use("TkAgg")
 
 def get_local_env(cfg):
     eval_env_agent = ParallelGymAgent(
-        partial(make_env, cfg.gym_env.env_name, autoreset=False, track="sandtrack"),
+        partial(
+            make_env,
+            cfg.gym_env.env_name,
+            autoreset=False,
+            track="sandtrack",
+            num_kart=2,
+        ),
         cfg.algorithm.n_envs_eval,
         include_last_state=True,
         seed=cfg.algorithm.seed.eval,
