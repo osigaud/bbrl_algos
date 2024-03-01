@@ -140,3 +140,23 @@ class MazeMDPContinuousWrapper(gym.Wrapper):
             truncated,
             info,
         )
+
+
+class BipedalWalkerWrapper(gym.Wrapper):
+    """
+    Specific wrapper to shape the reward of the rocket lander environment
+    """
+
+    def __init__(self, env):
+        super(BipedalWalkerWrapper, self).__init__(env)
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        return obs, info
+
+    def step(self, action):
+        next_state, reward, terminated, truncated, info = self.env.step(action)
+        # reward shaping
+        if reward > 0:
+            reward = reward * 10
+        return next_state, reward, terminated, truncated, info

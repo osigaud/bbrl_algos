@@ -22,7 +22,7 @@ def get_eval_env_agent(cfg):
         partial(make_env, cfg.gym_env.env_name, autoreset=False),
         cfg.algorithm.n_envs_eval,
         include_last_state=True,
-        seed=cfg.algorithm.seed.eval,
+        seed=cfg.gym_env.seed,
     )
     return eval_env_agent
 

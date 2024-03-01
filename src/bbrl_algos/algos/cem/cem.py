@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 import torch
 import torch.nn as nn
@@ -8,14 +9,14 @@ import optuna
 from omegaconf import DictConfig
 
 from bbrl.workspace import Workspace
-from bbrl.agents import Agents, TemporalAgent
+from bbrl.agents import Agents, TemporalAgent, PrintAgent
 
 from bbrl_algos.models.loggers import Logger
 from bbrl_algos.models.hyper_params import launch_optuna
 from bbrl_algos.models.utils import save_best
 
 # Neural network models for actors and critics
-from bbrl_algos.models.actors import (
+from bbrl_algos.models.actors_debug import (
     ContinuousDeterministicActor,
     DiscreteDeterministicActor,
 )
@@ -30,6 +31,7 @@ from bbrl_algos.models.stochastic_actors import (
     BernoulliActor,
 )
 from bbrl_algos.models.envs import get_eval_env_agent
+from bbrl_algos.wrappers.env_wrappers import BipedalWalkerWrapper
 
 from bbrl.visu.plot_policies import plot_policy
 
@@ -62,29 +64,32 @@ class CovMatrix:
 # Create the CEM Agent
 def create_CEM_agent(cfg, env_agent):
     obs_size, act_size = env_agent.get_obs_and_actions_sizes()
+    torch.random.manual_seed(seed=cfg.seed.agent)
     policy = globals()[cfg.algorithm.actor_type](
         obs_size, cfg.algorithm.architecture.actor_hidden_size, act_size
     )
     ev_agent = Agents(env_agent, policy)
     eval_agent = TemporalAgent(ev_agent)
-
-    return eval_agent
+    return eval_agent, policy
 
 
 def run_cem(cfg, logger, trial=None):
     eval_env_agent = get_eval_env_agent(cfg)
+    print(
+        "xxxxxxxxxxxxxxxxxxxxxx params",
+        torch.nn.utils.parameters_to_vector(eval_env_agent.parameters()),
+    )
 
     pop_size = cfg.algorithm.pop_size
 
-    eval_agent = create_CEM_agent(cfg, eval_env_agent)
+    eval_agent, policy = create_CEM_agent(cfg, eval_env_agent)
 
-    centroid = torch.nn.utils.parameters_to_vector(eval_agent.parameters())
+    centroid = torch.nn.utils.parameters_to_vector(policy.model.parameters())
     matrix = CovMatrix(
         centroid,
         cfg.algorithm.sigma,
         cfg.algorithm.noise_multiplier,
     )
-
     best_reward = -np.inf
     nb_steps = 0
 
@@ -97,11 +102,12 @@ def run_cem(cfg, logger, trial=None):
         for i in range(pop_size):
             workspace = Workspace()
             w = weights[i]
-            torch.nn.utils.vector_to_parameters(w, eval_agent.parameters())
+            torch.nn.utils.vector_to_parameters(w, policy.model.parameters())
 
             eval_agent(workspace, t=0, stop_variable="env/done", render=False)
-            action = workspace["action"]
-            nb_steps += action.shape[0]
+            # action = workspace["action"]
+            new_steps = workspace["env/timestep"][-1]
+            nb_steps += new_steps.sum()
             rewards = workspace["env/cumulated_reward"][-1]
             mean_reward = rewards.mean()
             logger.add_log("reward", mean_reward, nb_steps)
@@ -123,7 +129,6 @@ def run_cem(cfg, logger, trial=None):
                     "./cem_best_agents/",
                     "cem",
                 )
-                # print(cfg.gym_env.env_name)
                 if cfg.plot_agents:
                     plot_policy(
                         eval_agent.agent.agents[1],
@@ -152,14 +157,14 @@ def run_cem(cfg, logger, trial=None):
 @hydra.main(
     config_path="./configs/",
     # config_name="cem_swimmer_optuna.yaml",
-    config_name="cem_swimmer_best.yaml",
+    # config_name="cem_swimmer_best.yaml",
+    config_name="cem_walker_test.yaml",
     # config_name="cem_mountain_car.yaml",
     # config_name="cem_cartpole.yaml",
     # version_base="1.3",
 )
 def main(cfg_raw: DictConfig):
-    torch.random.manual_seed(seed=cfg_raw.algorithm.seed.torch)
-
+    torch.random.manual_seed(seed=cfg_raw.seed.torch)
     if "optuna" in cfg_raw:
         launch_optuna(cfg_raw, run_cem)
     else:

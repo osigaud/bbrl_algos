@@ -23,7 +23,7 @@ algorithm:
       elites_nb: 5
       actor_type: ContinuousDeterministicActor
       architecture:
-            actor_hidden_size: [4, 4]
+            actor_hidden_size: [254, 254]
 
 gym_env:
       env_name: MountainCarContinuous-v0
