@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import random
 
 from bbrl_algos.models.actors import BaseActor
 from bbrl.agents import TimeAgent, SeedableAgent, SerializableAgent
@@ -103,6 +104,28 @@ class ActionAgent(TimeAgent, SeedableAgent, SerializableAgent):
         else:
             action = probs.argmax(1)
 
+        self.set(("action", t), action)
+
+
+class RandomDiscreteActor(TimeAgent, SeedableAgent, SerializableAgent):
+    def __init__(self, n_actions, *args, **kwargs):
+        super().__init__(name="random_discrete_actor", *args, **kwargs)
+        self.n_actions = n_actions
+
+    def forward(self, t, **kwargs):
+        action = torch.Tensor(random.randint(0, self.n_actions - 1))
+
+        self.set(("action", t), action)
+
+
+class RandomContinuousOneDActor(TimeAgent, SeedableAgent, SerializableAgent):
+    """It is assumed that the action is in [-1,1]"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(name="random_continuous_1D_actor", *args, **kwargs)
+
+    def forward(self, t, **kwargs):
+        action = torch.Tensor([[random.random() * 2 - 1]])
         self.set(("action", t), action)
 
 
