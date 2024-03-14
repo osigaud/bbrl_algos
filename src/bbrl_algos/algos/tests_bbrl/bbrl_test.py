@@ -33,11 +33,9 @@ class BBRLTest:
         print(tr_wp.variables["env/timestep"].size)
         nb_trans = tr_wp.variables["env/timestep"].size[1]
         # Un épisode dure 201 pas : du pas 0 au pas 200 inclus
-        # Du coup, il contient 200 transitions...
-        factor = int(
-            (taille - 1) / 201
-        )  # le test passe, vérifier que c'est le comportement correct
-        assert nb_trans == taille - 1 - factor, f"real size = {nb_trans} / {taille}"
+        # Si la taille est inférieure ou égale à 201, il y a déjà un épisode
+        nb_episodes = int((taille - 1) / 201) + 1
+        assert nb_trans == taille - nb_episodes, f"real size = {nb_trans} / {taille}"
 
     def test_rb_size(self, taille):
         wp = Workspace()
@@ -52,7 +50,7 @@ class BBRLTest:
 
 if __name__ == "__main__":
     testeur = BBRLTest(1)
-    taille = 890
+    taille = 201
     testeur.test_workspace_size(taille)
     testeur.test_transition_workspace_size(taille)
     testeur.test_rb_size(taille)
