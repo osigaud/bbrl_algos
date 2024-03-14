@@ -20,13 +20,16 @@ class BBRLTest:
         self.actor = RandomContinuousOneDActor()
         self.agent = TemporalAgent(Agents(self.env_agent, self.actor, PrintAgent()))
 
-    def test(self):
+    def test_workspace_size(self, taille):
         wp = Workspace()
-        taille = 520
         self.agent(wp, n_steps=taille)
         assert wp.time_size() == taille
-        tr_wp = wp.get_transitions()
 
+    def test_transition_workspace_size(self, taille):
+        wp = Workspace()
+
+        self.agent(wp, n_steps=taille)
+        tr_wp = wp.get_transitions()
         print(tr_wp.variables["env/timestep"].size)
         nb_trans = tr_wp.variables["env/timestep"].size[1]
         # assert tr_wp.time_size() == taille, f"real size = {tr_wp.time_size()}"
@@ -35,11 +38,21 @@ class BBRLTest:
             assert nb_trans == taille - 1 - factor, f"real size = {nb_trans} / {taille}"
         else:
             assert nb_trans == taille - 1, f"real size = {nb_trans} / {taille}"
+
+    def test_rb_size(self, taille):
+        wp = Workspace()
+        self.agent(wp, n_steps=taille)
+        tr_wp = wp.get_transitions()
         rb = ReplayBuffer(300)
         rb.put(tr_wp)
+        assert not rb.is_full, f" rb real size = {taille} / {rb.size()}"
+        assert rb.size() == tr_wp.variables["env/timestep"].size[1]
         print(rb.size(), rb.is_full)
 
 
 if __name__ == "__main__":
     testeur = BBRLTest(1)
-    testeur.test()
+    taille = 210
+    testeur.test_workspace_size(taille)
+    testeur.test_transition_workspace_size(taille)
+    testeur.test_rb_size(taille)
