@@ -33,13 +33,11 @@ class BBRLTest:
         print(tr_wp.variables["env/timestep"].size)
         nb_trans = tr_wp.variables["env/timestep"].size[1]
         # Un épisode dure 201 pas : du pas 0 au pas 200 inclus
-        # Du coup, il contient 200 transitions
+        # Du coup, il contient 200 transitions...
         factor = int(
             (taille - 1) / 201
         )  # le test passe, vérifier que c'est le comportement correct
         assert nb_trans == taille - 1 - factor, f"real size = {nb_trans} / {taille}"
-        # else:
-        #    assert nb_trans == taille - 1, f"real size = {nb_trans} / {taille}"
 
     def test_rb_size(self, taille):
         wp = Workspace()
