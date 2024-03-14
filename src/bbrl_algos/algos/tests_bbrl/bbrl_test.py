@@ -12,7 +12,7 @@ from bbrl.agents.gymnasium import make_env, ParallelGymAgent
 class BBRLTest:
     def __init__(self, n_envs):
         self.env_agent = ParallelGymAgent(
-            partial(make_env, "Pendulum-v1"),
+            partial(make_env, "Pendulum-v1", autoreset=True),
             n_envs,
             include_last_state=True,
             seed=1,
