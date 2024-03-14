@@ -22,13 +22,19 @@ class BBRLTest:
 
     def test(self):
         wp = Workspace()
-        taille = 210
+        taille = 520
         self.agent(wp, n_steps=taille)
         assert wp.time_size() == taille
         tr_wp = wp.get_transitions()
 
         print(tr_wp.variables["env/timestep"].size)
+        nb_trans = tr_wp.variables["env/timestep"].size[1]
         # assert tr_wp.time_size() == taille, f"real size = {tr_wp.time_size()}"
+        if taille > 200:
+            factor = int(taille / 200)
+            assert nb_trans == taille - 1 - factor, f"real size = {nb_trans} / {taille}"
+        else:
+            assert nb_trans == taille - 1, f"real size = {nb_trans} / {taille}"
         rb = ReplayBuffer(300)
         rb.put(tr_wp)
         print(rb.size(), rb.is_full)
