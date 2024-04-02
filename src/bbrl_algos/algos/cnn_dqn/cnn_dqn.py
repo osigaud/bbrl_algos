@@ -221,21 +221,28 @@ class Logger:
 
 
 def compute_critic_loss(
-    cfg,
-    reward: torch.Tensor,
-    must_bootstrap: torch.Tensor,
-    q_values: torch.Tensor,
-    action: torch.LongTensor,
+    discount_factor, reward, must_bootstrap, action, q_values, q_target=None
 ):
-    q_values_for_actions = q_values.gather(2, action.unsqueeze(-1)).squeeze(-1)
-    next_q_values = q_values[1:].max(dim=2)[0]
-    target_q_values = (
-        reward[:-1]
-        + cfg["algorithm"]["discount_factor"] * next_q_values * must_bootstrap[:-1]
-    )
-    loss = F.mse_loss(q_values_for_actions[:-1], target_q_values)
+    """Compute critic loss
+    Args:
+        discount_factor (float): The discount factor
+        reward (torch.Tensor): a (2 × T × B) tensor containing the rewards
+        must_bootstrap (torch.Tensor): a (2 × T × B) tensor containing 0 if the episode is completed at time $t$
+        action (torch.LongTensor): a (2 × T) long tensor containing the chosen action
+        q_values (torch.Tensor): a (2 × T × B × A) tensor containing Q values
+        q_target (torch.Tensor, optional): a (2 × T × B × A) tensor containing target Q values
 
-    return loss
+    Returns:
+        torch.Scalar: The loss
+    """
+    if q_target is None:
+        q_target = q_values
+    max_q = q_target[1].amax(dim=-1).detach()
+    target = reward[1] + discount_factor * max_q * must_bootstrap[1]
+    act = action[0].unsqueeze(dim=-1)
+    qvals = q_values[0].gather(dim=1, index=act)
+    qvals = qvals.squeeze(dim=1)
+    return nn.MSELoss()(qvals, target)
 
 
 # Configure the optimizer over the q agent
@@ -250,7 +257,7 @@ def get_env_agents(cfg):
     # print(cfg.algorithm.n_envs)
     train_env_agent = ParallelGymAgent(
         partial(
-            make_env, cfg.gym_env.env_name, render_mode="rgb_array", autoreset=False
+            make_env, cfg.gym_env.env_name, render_mode="rgb_array", autoreset=True
         ),
         cfg.algorithm.n_envs,
     ).seed(
@@ -321,11 +328,17 @@ def run_best_dqn(cfg, compute_critic_loss):
             train_workspace.zero_grad()
             train_workspace.copy_n_last_steps(1)
             train_agent(
-                train_workspace, t=1, n_steps=cfg.algorithm.n_steps, stochastic=True
+                train_workspace,
+                t=1,
+                n_steps=cfg.algorithm.n_steps_train,
+                stochastic=True,
             )
         else:
             train_agent(
-                train_workspace, t=0, n_steps=cfg.algorithm.n_steps, stochastic=True
+                train_workspace,
+                t=0,
+                n_steps=cfg.algorithm.n_steps_train,
+                stochastic=True,
             )
 
         # Get the transitions
@@ -361,7 +374,12 @@ def run_best_dqn(cfg, compute_critic_loss):
                 # Compute critic loss
                 # FIXME: homogénéiser les notations (soit tranche temporelle, soit rien)
                 critic_loss = compute_critic_loss(
-                    cfg, reward, must_bootstrap, q_values, target_q_values[1], action
+                    cfg.algorithm.discount_factor,
+                    reward,
+                    must_bootstrap,
+                    action,
+                    q_values,
+                    target_q_values[1],
                 )
                 # Store the loss for tensorboard display
                 logger.add_log("critic_loss", critic_loss, nb_steps)
@@ -374,7 +392,7 @@ def run_best_dqn(cfg, compute_critic_loss):
                 optimizer.step()
                 if (
                     nb_steps - last_critic_update_step
-                    > cfg.algorithm.target_critic_update
+                    > cfg.algorithm.target_critic_update_interval
                 ):
                     last_critic_update_step = nb_steps
                     target_q_agent.agent = copy.deepcopy(q_agent.agent)
@@ -394,12 +412,13 @@ def run_best_dqn(cfg, compute_critic_loss):
             if cfg.save_best and mean > best_reward:
                 print("test 3")
                 best_reward = mean
-                best_agent = copy.deepcopy(eval_agent.agent.agents[1])
+                best_agent = copy.deepcopy(eval_agent.agent.agents[2])
                 directory = "./dqn_critic/"
                 if not os.path.exists(directory):
                     os.makedirs(directory)
                 filename = directory + "dqn0_" + str(mean.item()) + ".agt"
-                eval_agent.save_model(filename)
+                critic_agent = eval_agent.agent.agents[2]
+                critic_agent.save_model(filename)
 
     return best_agent
 

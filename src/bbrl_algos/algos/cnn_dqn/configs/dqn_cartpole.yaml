@@ -40,7 +40,7 @@ algorithm:
   n_envs: 10
   n_steps_train: 50
 
-  optim_n_updates: 3
+  n_updates: 3
   discount_factor: 0.9
 
   max_epochs: 300
