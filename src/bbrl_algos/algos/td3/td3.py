@@ -288,7 +288,8 @@ def run_td3(cfg, logger, trial=None):
     config_path="configs/",
     # config_name="td3_cartpolecontinuous.yaml"
     # config_name="td3_pendulum_optuna.yaml",
-    config_name="td3_walker_test.yaml",
+    config_name="td3_swimmer.yaml",
+    # config_name="td3_walker_test.yaml",
 )  # , version_base="1.3")
 def main(cfg_raw: DictConfig):
     torch.random.manual_seed(seed=cfg_raw.algorithm.seed.torch)

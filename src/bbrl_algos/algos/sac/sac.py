@@ -369,8 +369,8 @@ def load_best(best_filename):
     # config_name="sac_cartpolecontinuous.yaml",
     # config_name="sac_pendulum.yaml",
     # config_name="sac_swimmer_optuna.yaml",
-    # config_name="sac_swimmer.yaml",
-    config_name="sac_walker_test.yaml",
+    config_name="sac_swimmer.yaml",
+    # config_name="sac_walker_test.yaml",
     # config_name="sac_torcs.yaml",
     # version_base="1.3",
 )
