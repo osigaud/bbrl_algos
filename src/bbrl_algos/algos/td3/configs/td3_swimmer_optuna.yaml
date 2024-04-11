@@ -1,4 +1,4 @@
-save_best: True
+    save_best: True
     plot_agents: False
 
     log_dir: ./tmp
@@ -42,15 +42,19 @@ save_best: True
         explorer: 4
         torch: 7
 
-      n_envs: 1
+      n_envs:
+        suggest_type: categorical
+        choices:
+                - 1
+                - 10
       n_steps_train: 
           suggest_type: categorical
-            choices:
+          choices:
                 - 60
                 - 90
                 - 256
                 - 10
-      n_steps: 4e5
+      n_steps: 150_000
       buffer_size: 1e6
       tau_target: 0.005
       optim_n_updates:
@@ -64,24 +68,29 @@ save_best: True
       learning_starts: 10000
       nb_evals: 1
       max_grad_norm: 0.5
-      batch_size: 256
+      batch_size:
+          suggest_type: categorical
+          choices:
+                - 90
+                - 256
+                - 512
       action_noise: 
         suggest_type: float
-          low: 0.0
-          high: 1.0
+        low: 0.0
+        high: 1.0
       discount_factor: 1.0
       architecture:
         actor_hidden_size: 
           suggest_type: categorical
-            choices:
+          choices:
                 - [64, 64]
                 - [128, 128]
                 - [256, 256]
                 - [400, 300]
                 - [512, 512]
         critic_hidden_size:
-        suggest_type: categorical
-            choices:
+          suggest_type: categorical
+          choices:
                 - [64, 64]
                 - [128, 128]
                 - [256, 256]
@@ -96,20 +105,20 @@ save_best: True
       classname: torch.optim.Adam
       lr:
         suggest_type: float
-          low: 1e-5
-          high: 1e-2
+        low: 1e-5
+        high: 1e-2
       eps: 
         suggest_type: float
-          low: 1e-9
-          high: 1e-4
+        low: 1e-9
+        high: 1e-4
     
     critic_optimizer:
       classname: torch.optim.Adam
       lr:
         suggest_type: float
-          low: 1e-5
-          high: 1e-2
+        low: 1e-5
+        high: 1e-2
       eps: 
         suggest_type: float
-          low: 1e-9
-          high: 1e-4
+        low: 1e-9
+        high: 1e-4

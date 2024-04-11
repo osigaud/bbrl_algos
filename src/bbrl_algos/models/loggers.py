@@ -4,9 +4,9 @@ from bbrl import instantiate_class
 
 
 class Logger:
-    def __init__(self, cfg):
+    def __init__(self, cfg, verbose=False):
         self.logger = instantiate_class(cfg.logger)
-        self.logger.save_hps(cfg, verbose=False)
+        self.logger.save_hps(cfg, verbose=verbose)
 
     def add_log(self, log_string, log_item, steps):
         if isinstance(log_item, torch.Tensor) and log_item.dim() == 0:
