@@ -205,7 +205,6 @@ def run_sac(cfg, logger, trial=None):
     # init_entropy_coef is the initial value of the entropy coef alpha.
     ent_coef = cfg.algorithm.init_entropy_coef
     tau = cfg.algorithm.tau_target
-
     # 2) Create the environment agent
     train_env_agent, eval_env_agent = get_env_agents(cfg)
 

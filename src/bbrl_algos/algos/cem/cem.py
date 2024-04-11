@@ -16,7 +16,7 @@ from bbrl_algos.models.hyper_params import launch_optuna
 from bbrl_algos.models.utils import save_best
 
 # Neural network models for actors and critics
-from bbrl_algos.models.actors_debug import (
+from bbrl_algos.models.actors import (
     ContinuousDeterministicActor,
     DiscreteDeterministicActor,
 )
@@ -75,10 +75,6 @@ def create_CEM_agent(cfg, env_agent):
 
 def run_cem(cfg, logger, trial=None):
     eval_env_agent = get_eval_env_agent(cfg)
-    print(
-        "xxxxxxxxxxxxxxxxxxxxxx params",
-        torch.nn.utils.parameters_to_vector(eval_env_agent.parameters()),
-    )
 
     pop_size = cfg.algorithm.pop_size
 
@@ -115,7 +111,7 @@ def run_cem(cfg, logger, trial=None):
             # ---------------------------------------------------
             list_rewards.append(mean_reward)
 
-            if cfg.verbose:
+            if cfg.very_verbose:
                 print(
                     f"Indiv: {i + 1}, nb_steps: {nb_steps}, reward: {mean_reward:.2f}, best reward {best_reward:.2f}"
                 )
@@ -149,7 +145,7 @@ def run_cem(cfg, logger, trial=None):
         # Update covariance
         matrix.update_covariance(elites_weights)
         if cfg.verbose:
-            print("---------------------")
+            print(f"Nb_steps: {nb_steps}, best reward {best_reward:.2f}")
     return best_reward
 
 
@@ -157,8 +153,8 @@ def run_cem(cfg, logger, trial=None):
 @hydra.main(
     config_path="./configs/",
     # config_name="cem_swimmer_optuna.yaml",
-    # config_name="cem_swimmer_best.yaml",
-    config_name="cem_walker_test.yaml",
+    config_name="cem_swimmer_best.yaml",
+    # config_name="cem_walker_test.yaml",
     # config_name="cem_mountain_car.yaml",
     # config_name="cem_cartpole.yaml",
     # version_base="1.3",

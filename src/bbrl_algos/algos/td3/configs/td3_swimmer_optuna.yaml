@@ -1,0 +1,115 @@
+save_best: True
+    plot_agents: False
+
+    log_dir: ./tmp
+    video_dir: ${log_dir}/videos
+
+    hydra:
+      run:
+        dir: ${log_dir}/hydra/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+    optuna:
+      study:
+        _target_: optuna.create_study
+        study_name: td3_swimmer
+        direction: maximize
+        # for a list of optuna pruners, this is here: https://optuna.readthedocs.io/en/stable/reference/pruners.html
+        pruner:
+          _target_: optuna.pruners.MedianPruner
+          n_startup_trials: 5
+          n_warmup_steps: 5
+          interval_steps: 1
+      optimize:
+        n_trials: 10000
+        timeout: 3600
+        n_jobs: 1
+
+
+    logger:
+      classname: bbrl.utils.logger.TFLogger
+      log_dir: ${log_dir}
+      cache_size: 10000
+      every_n_seconds: 10
+      verbose: False
+
+    algorithm:
+
+      seed:
+        train: 0
+        eval: 8
+        q: 1
+        act: 2
+        explorer: 4
+        torch: 7
+
+      n_envs: 1
+      n_steps_train: 
+          suggest_type: categorical
+            choices:
+                - 60
+                - 90
+                - 256
+                - 10
+      n_steps: 4e5
+      buffer_size: 1e6
+      tau_target: 0.005
+      optim_n_updates:
+        suggest_type: categorical
+        choices:
+          - 1
+          - 3
+          - 4
+          - 6
+      eval_interval: 2500
+      learning_starts: 10000
+      nb_evals: 1
+      max_grad_norm: 0.5
+      batch_size: 256
+      action_noise: 
+        suggest_type: float
+          low: 0.0
+          high: 1.0
+      discount_factor: 1.0
+      architecture:
+        actor_hidden_size: 
+          suggest_type: categorical
+            choices:
+                - [64, 64]
+                - [128, 128]
+                - [256, 256]
+                - [400, 300]
+                - [512, 512]
+        critic_hidden_size:
+        suggest_type: categorical
+            choices:
+                - [64, 64]
+                - [128, 128]
+                - [256, 256]
+                - [400, 300]
+                - [512, 512]
+
+    gym_env:
+      env_name: SwimmerBBRLEnv-v0
+      xml_file: swimmer3.xml
+
+    actor_optimizer:
+      classname: torch.optim.Adam
+      lr:
+        suggest_type: float
+          low: 1e-5
+          high: 1e-2
+      eps: 
+        suggest_type: float
+          low: 1e-9
+          high: 1e-4
+    
+    critic_optimizer:
+      classname: torch.optim.Adam
+      lr:
+        suggest_type: float
+          low: 1e-5
+          high: 1e-2
+      eps: 
+        suggest_type: float
+          low: 1e-9
+          high: 1e-4

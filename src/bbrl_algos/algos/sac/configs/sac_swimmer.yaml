@@ -25,11 +25,11 @@ algorithm:
             explorer: 456
             torch: 7
 
-      n_envs: 1
-      n_steps_train: 100
+      n_envs: 25
+      n_steps_train: 10
       n_steps: 1e6
       eval_interval: 5000
-      nb_evals: 10
+      nb_evals: 2
       buffer_size: 1e6
       batch_size: 256
       learning_starts: 10_000
@@ -37,7 +37,7 @@ algorithm:
       max_grad_norm: 0.5
       discount_factor: 0.9999
 
-      entropy_mode: "fixed" # "auto" or "fixed"
+      entropy_mode: "auto" # "auto" or "fixed"
       init_entropy_coef: 0.2
       actor_type: SquashedGaussianActorNew
       architecture:
@@ -53,11 +53,14 @@ gym_env:
 actor_optimizer:
       classname: torch.optim.Adam
       lr: 0.0003
+      eps: 1e-5
 
 critic_optimizer:
       classname: torch.optim.Adam
       lr: 0.0003
+      eps: 1e-5
 
 entropy_coef_optimizer:
       classname: torch.optim.Adam
       lr: 0.0003
+      eps: 1e-5

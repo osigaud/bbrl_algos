@@ -42,13 +42,13 @@ def get_env_agents(
 ) -> Tuple[GymAgent, GymAgent]:
     # Returns a pair of environments (train / evaluation) based on a configuration `cfg`
 
-    if "xml_file" in cfg.gym_env:
+    if "xml_file" in cfg.gym_env.keys():
         xml_file = assets_path + cfg.gym_env.xml_file
         print("loading:", xml_file)
     else:
         xml_file = None
 
-    if "wrappers" in cfg.gym_env:
+    if "wrappers" in cfg.gym_env.keys():
         print("using wrappers:", cfg.gym_env.wrappers)
         # wrappers_name_list = cfg.gym_env.wrappers.split(',')
         wrappers_list = []

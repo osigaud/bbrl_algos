@@ -26,7 +26,7 @@
         torch: 7
 
       n_envs: 1
-      n_steps_train: 80
+      n_steps_train: 90
       n_steps: 5e6
       buffer_size: 1e6
       tau_target: 0.005
@@ -39,16 +39,19 @@
       action_noise: 0.2
       discount_factor: 1.0
       architecture:
-        actor_hidden_size: [32, 32]
+        actor_hidden_size: [256, 256]
         critic_hidden_size: [256, 256]
 
     gym_env:
-      env_name: Swimmer-v3
+      env_name: SwimmerBBRLEnv-v0
+      xml_file: swimmer3.xml
 
     actor_optimizer:
       classname: torch.optim.Adam
-      lr: 0.0002
+      lr: 0.0003
+      eps: 1e-5
     
     critic_optimizer:
       classname: torch.optim.Adam
-      lr: 0.001
+      lr: 0.0003
+      eps: 1e-5
