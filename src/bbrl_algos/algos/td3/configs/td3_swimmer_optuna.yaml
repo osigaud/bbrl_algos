@@ -103,22 +103,22 @@
 
     actor_optimizer:
       classname: torch.optim.Adam
-      lr:
+      lra:
         suggest_type: float
         low: 1e-5
         high: 1e-2
-      eps: 
+      epsa: 
         suggest_type: float
         low: 1e-9
         high: 1e-4
     
     critic_optimizer:
       classname: torch.optim.Adam
-      lr:
+      lrc:
         suggest_type: float
         low: 1e-5
         high: 1e-2
-      eps: 
+      epsc: 
         suggest_type: float
         low: 1e-9
         high: 1e-4
