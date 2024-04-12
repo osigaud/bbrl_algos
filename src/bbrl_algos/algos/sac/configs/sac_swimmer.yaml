@@ -1,5 +1,5 @@
 save_best: True
-plot_agents: True
+plot_agents: False
 collect_stats: False
 
 log_dir: ./tmp
@@ -25,10 +25,10 @@ algorithm:
             explorer: 456
             torch: 7
 
-      n_envs: 25
+      n_envs: 1
       n_steps_train: 10
-      n_steps: 1e6
-      eval_interval: 5000
+      n_steps: 5e6
+      eval_interval: 2500
       nb_evals: 2
       buffer_size: 1e6
       batch_size: 256
@@ -41,8 +41,8 @@ algorithm:
       init_entropy_coef: 0.2
       actor_type: SquashedGaussianActorNew
       architecture:
-            actor_hidden_size: [256, 256] 
-            critic_hidden_size: [256, 256] 
+            actor_hidden_size: [64, 64] 
+            critic_hidden_size: [512, 512] 
 
 
       # Note: Swimmer-v3 is deprecated, but Swimmer-v4 does not seem to accept an xml_file
@@ -53,12 +53,12 @@ gym_env:
 actor_optimizer:
       classname: torch.optim.Adam
       lr: 0.0003
-      eps: 1e-5
+      eps: 5e-5
 
 critic_optimizer:
       classname: torch.optim.Adam
       lr: 0.0003
-      eps: 1e-5
+      eps: 5e-5
 
 entropy_coef_optimizer:
       classname: torch.optim.Adam

@@ -4,7 +4,7 @@ from bbrl import instantiate_class
 
 
 class Logger:
-    def __init__(self, cfg, verbose=False):
+    def __init__(self, cfg, verbose=True):
         self.logger = instantiate_class(cfg.logger)
         self.logger.save_hps(cfg, verbose=verbose)
 
