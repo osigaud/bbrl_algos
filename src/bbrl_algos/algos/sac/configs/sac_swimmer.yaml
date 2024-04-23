@@ -42,7 +42,7 @@ algorithm:
       actor_type: SquashedGaussianActorNew
       architecture:
             actor_hidden_size: [64, 64] 
-            critic_hidden_size: [512, 512] 
+            critic_hidden_size: [256, 256] 
 
 
       # Note: Swimmer-v3 is deprecated, but Swimmer-v4 does not seem to accept an xml_file
@@ -52,15 +52,15 @@ gym_env:
 
 actor_optimizer:
       classname: torch.optim.Adam
-      lr: 0.0003
+      lr: 0.006
       eps: 5e-5
 
 critic_optimizer:
       classname: torch.optim.Adam
-      lr: 0.0003
+      lr: 0.006
       eps: 5e-5
 
 entropy_coef_optimizer:
       classname: torch.optim.Adam
-      lr: 0.0003
+      lr: 0.003
       eps: 1e-5

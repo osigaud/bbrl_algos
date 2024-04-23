@@ -16,29 +16,29 @@
         torch: 789
 
       max_grad_norm: 0.8
-      n_envs: 10
+      n_envs: 1
       n_steps_train: 250
-      eval_interval: 10_000
+      eval_interval: 1_000
       nb_evals: 10
       gae: 0.7
       n_steps: 3_000_000
-      beta: 10
+      beta: 6.
       discount_factor: 0.9
       clip_range: 0.2
-      clip_range_vf: 0
-      entropy_coef: 0.0
-      critic_coef: 0.5
-      policy_coef: 0.8
-      opt_epochs: 5
-      batch_size: 256
+      clip_range_vf: 0.1
+      entropy_coef: 0.1
+      critic_coef: 0.8
+      policy_coef: 0.9
+      opt_epochs: 3
+      batch_size: 84
       policy_type: DiscretePPOActor
       architecture:
-        policy_hidden_size: [400, 300]
-        critic_hidden_size: [400, 300]
+        policy_hidden_size: [256, 256]
+        critic_hidden_size: [256, 256]
 
     gym_env:
       env_name: LunarLander-v2
 
     optimizer:
       classname: torch.optim.Adam
-      lr: 0.0008
+      lr: 0.003

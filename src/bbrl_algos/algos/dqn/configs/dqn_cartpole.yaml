@@ -38,11 +38,11 @@ algorithm:
     decay: 0.999
 
   buffer:
-    max_size: 150000
+    max_size: 1e6
     batch_size: 256
     learning_starts: 2000
 
-  target_critic_update_interval: 100
+  target_critic_update_interval: 50
   max_grad_norm: 0.5
 
   nb_evals: 10
@@ -52,10 +52,11 @@ algorithm:
   optim_n_updates: 3
   discount_factor: 0.9
 
-  n_steps: 300_000
+  n_steps: 900_000
   eval_interval: 1000
 
 
 optimizer:
   classname: torch.optim.Adam
   lr: 5e-4
+  eps: 5e-5
