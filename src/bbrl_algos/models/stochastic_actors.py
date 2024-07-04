@@ -376,7 +376,7 @@ LOG_STD_MIN = -20
 
 
 # old version relying on the SB3 version
-class SquashedGaussianActor(StochasticActor):
+class OldSquashedGaussianActor(StochasticActor):
     def __init__(
         self, state_dim, hidden_layers, action_dim, name="policy", *args, **kwargs
     ):
@@ -402,7 +402,7 @@ class SquashedGaussianActor(StochasticActor):
         return action_dist.log_prob(action)
 
 
-class SquashedGaussianActorNew(StochasticActor):
+class SquashedGaussianActor(StochasticActor):
     def __init__(
         self,
         state_dim,

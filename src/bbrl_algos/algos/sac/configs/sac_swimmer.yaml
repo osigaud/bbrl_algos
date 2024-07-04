@@ -39,7 +39,7 @@ algorithm:
 
       entropy_mode: "auto" # "auto" or "fixed"
       init_entropy_coef: 0.2
-      actor_type: SquashedGaussianActorNew
+      actor_type: SquashedGaussianActor
       architecture:
             actor_hidden_size: [64, 64] 
             critic_hidden_size: [256, 256] 
