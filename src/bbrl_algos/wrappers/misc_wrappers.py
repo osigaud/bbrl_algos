@@ -1,5 +1,6 @@
 import gymnasium as gym
 import numpy as np
+import copy
 
 
 class FeatureInverter(gym.Wrapper):
@@ -95,8 +96,9 @@ class TimeExtensionWrapper(gym.Wrapper):
     """
     This wrapper is used to temporally extend an environment
     so that it takes N actions as input and only plays the first
-    And it returns two successive observations, by memorizing the previous one from the inner environment
+    And it returns M successive observations, by memorizing the M-1 previous ones from the inner environment
     It makes it possible to build temporally extended policies and critics in a transparent way.
+    TODO: At the moment, the implementation only works for M=N=2.
     """
 
     def __init__(self, env):
@@ -106,43 +108,44 @@ class TimeExtensionWrapper(gym.Wrapper):
         """
         super(TimeExtensionWrapper, self).__init__(env)
 
-        low_space = env.observation_space.low
-        high_space = env.observation_space.high
+        low_space = copy.deepcopy(env.observation_space.low)
+        high_space = copy.deepcopy(env.observation_space.high)
+        self.empty_mem = np.zeros(self.env.observation_space.shape[0])
         new_low = np.concatenate((low_space, low_space))
         new_high = np.concatenate((high_space, high_space))
         self.observation_space.low = new_low
         self.observation_space.high = new_high
-        self.observation_space._shape = new_low.shape
-        # print("obs space : ", self.observation_space.low, self.observation_space.high)
-        # print("shape : ", self.observation_space.shape)
-        self.state_memory = np.zeros(
-            self.observation_space.shape[0]
-        )  # TODO: étendre à un nombre d'états quelconques
+        self.observation_space._shape = (
+            new_low.shape
+        )  # strong warning, it seems that the shape of the inner env is alos changed
+        # TODO: étendre à un nombre d'états quelconques
+        self.state_memory = self.empty_mem
 
-        # action_space = gym.spaces.MultiDiscrete(np.array(env.action_space.n, env.action_space.n))
-        action_space = gym.spaces.MultiDiscrete(
-            [env.action_space.n, env.action_space.n]
-        )  # TODO: étendre à un nombre d'actions quelconques
-        self.action_space = action_space
-        # print("action space : ", self.action_space)
+        # TODO: étendre à un nombre d'actions quelconques
+        low_action = copy.deepcopy(env.action_space.low)
+        high_action = copy.deepcopy(env.action_space.high)
+        new_low_action = np.concatenate((low_action, low_action))
+        new_high_action = np.concatenate((high_action, high_action))
+        self.action_space.low = new_low_action
+        self.action_space.high = new_high_action
+        self.action_space._shape = new_low_action.shape
 
     def step(self, action):
+        print(action)
         list_actions = np.split(action, 2)
         local_action = list_actions[0]
         # print("action locale :", local_action)
         observation, reward, terminated, truncated, info = self.env.step(
             local_action[0]
         )  # TODO: [0] pas generique
-        # observation = np.delete(observation, self.rank)
         full_obs = np.concatenate((observation, self.state_memory))
         self.state_memory = observation
         return full_obs, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         observation, info = self.env.reset(**kwargs)
-        self.state_memory = np.zeros(self.observation_space.shape[0])
+        self.state_memory = self.empty_mem
         full_obs = np.concatenate((observation, self.state_memory))
-        # print(full_obs)
         return full_obs, info
 
 

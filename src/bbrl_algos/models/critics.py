@@ -91,7 +91,6 @@ class DiscreteQAgent(NamedCritic):
 
     def forward(self, t, choose_action=True, **kwargs):
         obs = self.get(("env/env_obs", t))
-        # print("in critic forward: obs:", obs)
         q_values = self.model(obs)
         self.set((f"{self.name}/q_values", t), q_values)
         # Sets the action
